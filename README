@@ -1,0 +1,29 @@
+See http://marc.info/?l=opennms-discuss&m=130513573616502&w=2 for
+the background.
+
+OpenNMS supports authentication via LDAP, but does not synchronize
+user accounts. As a result you can't send notifications to LDAP
+users.
+
+The script translates LDAP user accounts into an entry in OpenNMS'
+users.xml file, which specifies local user accounts. By shadowing
+LDAP accounts into local accounts, you create a user entity to
+which notifications can be sent. 
+
+The script will connect to LDAP and pull down all the users in the
+base DN, optionally requiring group membership as well. It generates
+an XML tree for that user, substitutes the placeholders in the
+template (see the config section) with the corresponding field from
+LDAP and inserts that tree into the main file.
+
+The passwords in the generated XML are impossible hashes, so the
+'local' users can never log in. When the local user authentication
+fails, auth proceeds against LDAP. Notifications for a given
+username are seen regardless of which method is used to log in.
+
+My LDAP server is actually AD, so the defaults are set up for that.
+I've used the 'read-only' attribute to mark user entries as sync'd
+with LDAP - any read-only users in the XML will be deleted and
+replaced every time the sync runs.
+
+The dependencies are Python 2.5+ and BeautifulSoup. 
